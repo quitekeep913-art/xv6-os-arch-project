@@ -21,3 +21,13 @@
 #define SYS_mkdir  20
 #define SYS_close  21
 #define SYS_sync   22
+#define SYS_ps     22
+#define SYS_getsyscount 23
+#define SYS_freemem 24
+#define SYS_getppid 25
+#define SYS_halt 26
+#define SYS_setname 27
+#define SYS_getopenfiles 28
+#define SYS_getcpuid 29
+#define SYS_runnable 30
+#define SYS_getsatp 31

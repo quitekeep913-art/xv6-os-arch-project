@@ -150,7 +150,16 @@ UPROGS=\
 	$U/_forphan\
 	$U/_dorphan\
 	$U/_sync\
-
+    $U/_ps\
+    $U/_syscount\
+	$U/_free\
+	$U/_ppid\
+	$U/_halt\
+	$U/_rename\
+	$U/_openfiles\
+	$U/_cpuid\
+	$U/_runnable\
+	$U/_satp
 fs.img: mkfs/mkfs README $(UPROGS)
 	mkfs/mkfs fs.img README $(UPROGS)
 

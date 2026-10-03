@@ -103,7 +103,16 @@ extern uint64 sys_link(void);
 extern uint64 sys_mkdir(void);
 extern uint64 sys_close(void);
 extern uint64 sys_sync(void);
-
+extern uint64 sys_ps(void);
+extern uint64 sys_getsyscount(void);
+extern uint64 sys_freemem(void);
+extern uint64 sys_getppid(void);
+extern uint64 sys_halt(void);
+extern uint64 sys_setname(void);
+extern uint64 sys_getopenfiles(void);
+extern uint64 sys_getcpuid(void);
+extern uint64 sys_runnable(void);
+extern uint64 sys_getsatp(void);
 // An array mapping syscall numbers from syscall.h
 // to the function that handles the system call.
 static uint64 (*syscalls[])(void) = {
@@ -130,6 +139,16 @@ static uint64 (*syscalls[])(void) = {
   [SYS_mkdir]   = sys_mkdir,
   [SYS_close]   = sys_close,
   [SYS_sync]    = sys_sync,
+  [SYS_ps]      = sys_ps,
+  [SYS_getsyscount] = sys_getsyscount,
+  [SYS_freemem] = sys_freemem,
+  [SYS_getppid] = sys_getppid,
+  [SYS_halt] = sys_halt,
+  [SYS_setname] = sys_setname,
+  [SYS_getopenfiles] = sys_getopenfiles,
+  [SYS_getcpuid] = sys_getcpuid,
+  [SYS_runnable] = sys_runnable,
+  [SYS_getsatp] = sys_getsatp,
   // clang-format on
 };
 
@@ -138,7 +157,7 @@ syscall(void)
 {
   int num;
   struct proc *p = myproc();
-
+  p->syscall_count++;
   num = p->trapframe->a7;
   if (num > 0 && num < NELEM(syscalls) && syscalls[num]) {
     // Use num to lookup the system call function for num, call it,

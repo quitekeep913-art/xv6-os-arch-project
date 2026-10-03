@@ -25,7 +25,16 @@ char *sys_sbrk(int, int);
 int pause(int);
 int uptime(void);
 int sync(void);
-
+int ps(void);
+int getsyscount(void);
+int freemem(void);
+int getppid(void);
+int halt(void);
+int setname(char*);
+int getopenfiles(void);
+int getcpuid(void);
+int runnable(void);
+int getsatp(void);
 // ulib.c
 int stat(const char *, struct stat *);
 char *strcpy(char *, const char *);
