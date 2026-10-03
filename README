@@ -1,48 +1,102 @@
-xv6 is a re-implementation of Dennis Ritchie's and Ken Thompson's Unix
-Version 6 (v6).  xv6 loosely follows the structure and style of v6,
-but is implemented for a modern RISC-V multiprocessor using ANSI C.
+xv6 OS and Computer Architecture Project
+Overview
+This project extends the standard xv6-riscv operating system by implementing 10 custom, unique system calls. The modifications are divided into two primary categories: 5 Operating System (Multitasking/Process Management) modules and 5 Computer Architecture (Hardware/Emulator) modules. 
+The goal of this project is to create a mini-emulator environment within the kernel that directly interacts with RISC-V hardware registers, memory management, and process state queues.
+Part 1: Operating System & Multitasking Modules
+These modules enhance the OS's ability to manage processes, trace relationships, and handle file systems.
+   1. `ps` (Process Status)
+     Description: Scans the entire process table and prints the current status of all active processes, including their Process ID (PID), state (e.g., SLEEPING, RUNNING), and name.
+     Architectural Flow:User Space -> `sys_ps()` -> Kernel Process Table (`struct proc`) -> Console Output.
+graph TD
+    A[User Space: ps command] --> B[Kernel Space: sys_ps]
+    B --> C[Process Table: struct proc array]
+    C --> D[Filter Active Processes]
+    D --> E[Console: Print PID, STATE, NAME]
 
-ACKNOWLEDGMENTS
+   2. `getppid` (Get Parent Process ID)
+     Description:Retrieves and returns the Process ID of the parent process for the currently executing program. Essential for process tree tracking.
+     Architectural Flow:User Space -> `sys_getppid()` -> `myproc()->parent->pid`.
+graph TD
+    A[User Space: getppid()] --> B[Kernel Space: sys_getppid]
+    B --> C[Fetch Current Process: myproc]
+    C --> D[Read parent pointer: myproc->parent]
+    D --> E[Return Parent PID to User]
 
-xv6 is inspired by John Lions's Commentary on UNIX 6th Edition (Peer
-to Peer Communications; ISBN: 1-57398-013-7; 1st edition (June 14,
-2000)).  See also https://pdos.csail.mit.edu/6.1810/, which provides
-pointers to on-line resources for v6.
+   3. `rename` (Rename Process)
+     Description:Allows a running process to dynamically change its assigned name in the process table.
+     Architectural Flow:User Space (String Arg) -> `sys_rename()` -> `argstr()` -> Safely copy string to `myproc()->name`.
+graph TD
+    A[User Space: rename name_string] --> B[Kernel Space: sys_rename]
+    B --> C[Fetch String Argument: argstr]
+    C --> D[Fetch Current Process: myproc]
+    D --> E[Copy string to myproc->name]
+    E --> F[Return Success]
+   4. `openfiles` (Count Open Files)
+     Description:Iterates through the file descriptor table of the current process and counts exactly how many files are currently open.
+     Architectural Flow:User Space -> `sys_openfiles()` -> Loop through `myproc()->ofile` array -> Return count.
+graph TD
+    A[User Space: openfiles()] --> B[Kernel Space: sys_openfiles]
+    B --> C[Fetch Current Process: myproc]
+    C --> D[Iterate File Descriptor Array: myproc->ofile]
+    D --> E[Count Non-Null Entries]
+    E --> F[Return Total Open Files]
+   5. `runnable` (Count Runnable Processes)
+     Description:Scans the kernel's process table to count how many processes are in the `RUNNABLE` state, waiting in the queue for CPU time.
+     Architectural Flow:User Space -> `sys_runnable()` -> Traverse `proc[]` array -> Filter by `RUNNABLE` state.
+graph TD
+    A[User Space: runnable()] --> B[Kernel Space: sys_runnable]
+    B --> C[Process Table: struct proc array]
+    C --> D[Loop & Check if state == RUNNABLE]
+    D --> E[Increment Counter]
+    E --> F[Return Total Runnable Count]
 
-The following people have made contributions: Russ Cox (context switching,
-locking), Cliff Frey (MP), Xiao Yu (MP), Nickolai Zeldovich, and Austin
-Clements.
+Part 2: Computer Architecture & Hardware Modules
+These modules interact directly with the RISC-V architecture, reading hardware registers and memory states.
+   6. `syscount` (Total System Calls Counter)
+     Description:Acts as a performance monitor by tracking the total number of system calls executed by the kernel since the OS booted.
+     Architectural Flow:User Space -> `sys_syscount()` -> Access global kernel counter (protected by spinlocks).
+graph TD
+    A[User Space: syscount()] --> B[Kernel Space: sys_syscount]
+    B --> C[Access Global Variable: total_syscalls]
+    C --> D[Fetch Count Value]
+    D --> E[Return Value to User Space]
 
-We are also grateful for the bug reports and patches contributed by
-Abhinavpatel00, Takahiro Aoyagi, Marcelo Arroyo, Hirbod Behnam, Silas
-Boyd-Wickizer, Anton Burtsev, carlclone, Ian Chen, clivezeng, Dan
-Cross, Cody Cutler, Mike CAT, Tej Chajed, Asami Doi,Wenyang Duan,
-echtwerner, eyalz800, Nelson Elhage, Saar Ettinger, Alice Ferrazzi,
-Nathaniel Filardo, flespark, Peter Froehlich, Yakir Goaron, Shivam
-Handa, Matt Harvey, Bryan Henry, jaichenhengjie, Jim Huang, Matúš
-Jókay, John Jolly, Alexander Kapshuk, Anders Kaseorg, kehao95,
-Wolfgang Keller, Jungwoo Kim, Jonathan Kimmitt, Eddie Kohler, Vadim
-Kolontsov, Austin Liew, Bruce Lowekamp, l0stman, Pavan Maddamsetti,
-Imbar Marinescu, Yandong Mao, Matan Shabtay, Hitoshi Mitake, Carmi
-Merimovich, mes900903, Mark Morrissey, mtasm, Joel Nider, Hayato Ohhashi,
-OptimisticSide, papparapa, phosphagos, Harry Porter, Greg Price, Zheng
-qhuo, Quancheng, RayAndrew, Jude Rich, segfault, Ayan Shafqat, Eldar
-Sehayek, Yongming Shen, Fumiya Shigemitsu, snoire, Taojie, Cam Tenny,
-tyfkda, Warren Toomey, Stephen Tu, Alissa Tung, Rafael Ubal, unicornx,
-Amane Uehara, Pablo Ventura, Luc Videau, Xi Wang, WaheedHafez, Keiichi
-Watanabe, Lucas Wolf, Nicolas Wolovick, wxdao, Grant Wu, x653, Andy
-Zhang, Jindong Zhang, Icenowy Zheng, ZhUyU1997, and Zou Chang Wei.
+   7. `free` (Available Free Memory)
+      Description:Calculates and returns the total amount of free RAM available in the system by traversing the kernel's linked list of free memory pages (`kmem.freelist`).
+      Architectural Flow:User Space -> `sys_free()` -> Lock `kmem` -> Traverse linked list -> Multiply nodes by page size (4096 bytes).
+graph TD
+    A[User Space: free()] --> B[Kernel Space: sys_free]
+    B --> C[Acquire Memory Lock: kmem.lock]
+    C --> D[Traverse Linked List: kmem.freelist]
+    D --> E[Count Free Pages & Release Lock]
+    E --> F[Multiply by 4096 bytes & Return Total RAM]
 
-ERROR REPORTS
+    8. `halt` (System Shutdown)
+      Description:Sends a direct command to the QEMU emulator/RISC-V hardware to power off the system, safely terminating the OS.
+      Architectural Flow:User Space -> `sys_halt()` -> Trigger QEMU reset test device at specific memory-mapped I/O (MMIO) address.
+graph TD
+    A[User Space: halt()] --> B[Kernel Space: sys_halt]
+    B --> C[Access MMIO Address: 0x100000]
+    C --> D[Write Magic Number: 0x5555]
+    D --> E[QEMU Emulator/Hardware Power Off]
 
-Please send errors and suggestions to Frans Kaashoek and Robert Morris
-(kaashoek,rtm@mit.edu).  The main purpose of xv6 is as a teaching
-operating system for MIT's 6.1810, so we are more interested in
-simplifications and clarifications than new features.
+    9. `getcpuid` (Identify CPU Core)
+       Description:Safely disables interrupts, reads the hardware CPU ID to determine which physical core the current process is running on, and re-enables interrupts.
+       Architectural Flow:User Space -> `sys_getcpuid()` -> `push_off()` -> `cpuid()` register -> `pop_off()`.
+graph TD
+    A[User Space: getcpuid()] --> B[Kernel Space: sys_getcpuid]
+    B --> C[Disable Interrupts: push_off]
+    C --> D[Read Hardware Register: cpuid]
+    D --> E[Enable Interrupts: pop_off]
+    E --> F[Return CPU Core Number]
 
-BUILDING AND RUNNING XV6
+     10. `getsatp` (Read SATP Register)
+         Description:Directly reads the RISC-V `satp` (Supervisor Address Translation and Protection) hardware register, which is responsible for page table configurations.
+         Architectural Flow:User Space -> `sys_getsatp()` -> Direct RISC-V `r_satp()` inline assembly execution.
+graph TD
+    A[User Space: getsatp()] --> B[Kernel Space: sys_getsatp]
+    B --> C[Execute Inline Assembly: r_satp]
+    C --> D[Read Hardware SATP Register directly]
+    D --> E[Return 64-bit Hex Value to User]
 
-You will need a RISC-V "newlib" tool chain from
-https://github.com/riscv/riscv-gnu-toolchain, and qemu compiled for
-riscv64-softmmu.  Once they are installed, and in your shell
-search path, you can run "make qemu".
+Developed as part of the OS and Computer Architecture Kernel Extension Project.
