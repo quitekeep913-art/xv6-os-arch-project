@@ -4,7 +4,6 @@ This project extends the standard **xv6-riscv** operating system by implementing
 The goal of this project is to create a mini-emulator environment within the kernel that directly interacts with RISC-V hardware registers, memory management, and process state queues.
 
 Part 1: Operating System & Multitasking Modules
-
 These modules enhance the OS's ability to manage processes, trace relationships, and handle file systems.
 
 ### 1. `ps` (Process Status)
