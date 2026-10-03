@@ -2,13 +2,10 @@
 
 ## Overview
 This project extends the standard **xv6-riscv** operating system by implementing 10 custom, unique system calls. The modifications are divided into two primary categories: 5 Operating System (Multitasking/Process Management) modules and 5 Computer Architecture (Hardware/Emulator) modules. 
-
 The goal of this project is to create a mini-emulator environment within the kernel that directly interacts with RISC-V hardware registers, memory management, and process state queues.
 
 ## Part 1: Operating System & Multitasking Modules
-
 These modules enhance the OS's ability to manage processes, trace relationships, and handle file systems.
-
 ### 1. `ps` (Process Status)
 * **Description:** Scans the entire process table and prints the current status of all active processes, including their Process ID (PID), state (e.g., SLEEPING, RUNNING), and name.
 * **Architectural Flow:** User Space -> `sys_ps()` -> Kernel Process Table (`struct proc`) -> Console Output.
