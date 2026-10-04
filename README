@@ -49,3 +49,5 @@ These modules interact directly with the RISC-V architecture, reading hardware r
        Architectural Flow: User Space -> `sys_getsatp()` -> Direct RISC-V `r_satp()` inline assembly execution.
 
 Developed as part of the OS and Computer Architecture Kernel Extension Project.
+
+Note for Examiner: All architectural flow diagrams and terminal output screenshots for the 10 modules have been uploaded in the attached folder.
