@@ -8,7 +8,7 @@ The goal of this project is to create a mini-emulator environment within the ker
 These modules enhance the OS's ability to manage processes, trace relationships, and handle file systems.
  ###  1. `ps` (Process Status)
    **Description:** Scans the entire process table and prints the current status of all active processes, including their Process ID (PID), state (e.g., SLEEPING, RUNNING), and name.
-   **Architectural Flow:** User Space -> `sys_ps()` -> Kernel Process Table (`struct proc`) -> Console Output.
+  ''' **Architectural Flow:** User Space -> `sys_ps()` -> Kernel Process Table (`struct proc`) -> Console Output.'''
    **Diagram**
    ![ps diagram](<Project_Diagram_Output/ps module diagram.jpeg>)
 
