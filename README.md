@@ -1,3 +1,5 @@
+**Submitted By: Hina Bashir**
+#### **Submitted To: Sir Raza**
 # **xv6 OS and Computer Architecture Project**
 ## **Overview**
 This project extends the standard **xv6-riscv** operating system by implementing 10 custom, unique system calls. The modifications are divided into two primary categories: 5 Operating System (Multitasking/Process Management) modules and 5 Computer Architecture (Hardware/Emulator) modules. 
